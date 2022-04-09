@@ -108,21 +108,21 @@ describe("Airdrop", function () {
         ],
       };
       const value = {
-        claimer: account2.address,
+        claimer: account1.address,
         amount: parseEther("1"),
       };
 
-      const signature = await account2._signTypedData(domain, types, value);
+      const signature = await account1._signTypedData(domain, types, value);
 
       // happy path
-      expect(await airdrop.connect(account2).signatureClaim(signature, account2.address, parseEther("1"))).to.emit(
+      expect(await airdrop.connect(account1).signatureClaim(signature, account1.address, parseEther("1"))).to.emit(
         airdrop,
         "SignatureClaim"
       );
 
       // reverts if user tries to claim again
       await expect(
-        airdrop.connect(account2).signatureClaim(signature, account2.address, parseEther("1"))
+        airdrop.connect(account1).signatureClaim(signature, account1.address, parseEther("1"))
       ).to.be.revertedWith("already claimed");
     });
   });

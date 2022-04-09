@@ -77,14 +77,14 @@ contract Airdrop is Ownable {
         uint256 _amount
     ) external {
         require(!isECDSADisabled, "SIGS_DISABLED");
-        require(!alreadyClaimed[_to], "already claimed");
-        alreadyClaimed[_to] = true;
-        bytes32 dataHash = toTypedDataHash(_to, _amount);
+        require(!alreadyClaimed[msg.sender], "already claimed");
+        alreadyClaimed[msg.sender] = true;
+        bytes32 dataHash = toTypedDataHash(msg.sender, _amount);
         address claimer = ECDSA.recover(dataHash, signature);
-        require(claimer == _to && claimer != address(0), "invalid signature");
-        bool success = shipToken.transfer(claimer, _amount);
+        require(claimer == signer && claimer != address(0), "invalid signature");
+        bool success = shipToken.transfer(_to, _amount);
         require(success, "transfer failed");
-        emit SignatureClaim(_to, _amount);
+        emit SignatureClaim(msg.sender, _amount);
     }
 
     /// @notice Allows a msg.sender to claim their $SHIP token by providing a
@@ -101,8 +101,8 @@ contract Airdrop is Ownable {
         address _to,
         uint256 _amount
     ) external {
-        require(!alreadyClaimed[_to], "already claimed");
-        alreadyClaimed[_to] = true;
+        require(!alreadyClaimed[msg.sender], "already claimed");
+        alreadyClaimed[msg.sender] = true;
 
         bytes32 leaf = toLeafFormat(_to, _amount);
 
@@ -117,7 +117,7 @@ contract Airdrop is Ownable {
         require(leaf == merkleRoot, "invalid merkle proof");
         bool success = shipToken.transfer(_to, _amount);
         require(success, "transfer failed");
-        emit MerkleClaim(_to, _amount);
+        emit MerkleClaim(msg.sender, _amount);
     }
 
     /// @notice Causes `Airdrop.signatureClaim` to always revert
